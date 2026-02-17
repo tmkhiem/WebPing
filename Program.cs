@@ -36,6 +36,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Serve static files (HTML, CSS, JS)
+app.UseStaticFiles();
+
 // Add authentication middleware
 app.UseMiddleware<BasicAuthMiddleware>();
 

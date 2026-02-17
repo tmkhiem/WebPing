@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebPing - Manage Topics</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 WebPing - Topics</h1>
+        <p class="subtitle">Manage your notification topics</p>
+
+        <div id="user-info" class="user-info"></div>
+
+        <!-- Create Topic Section -->
+        <section>
+            <h2>Create New Topic</h2>
+            <form onsubmit="handleCreateTopic(event)">
+                <div class="form-group">
+                    <label for="topic-name">Topic Name</label>
+                    <input 
+                        type="text" 
+                        id="topic-name" 
+                        placeholder="e.g., fileTransferComplete, buildFinished"
+                        required
+                        pattern="[a-zA-Z0-9_-]+"
+                        title="Only letters, numbers, hyphens and underscores allowed"
+                    >
+                    <small style="color: #666;">Use descriptive names like "copyFilesCompleted" or "deploymentFinished"</small>
+                </div>
+                <button type="submit">Create Topic</button>
+            </form>
+        </section>
+
+        <!-- Topics List Section -->
+        <section class="list-container">
+            <h2>Your Topics</h2>
+            <div id="loading" class="loading">Loading topics...</div>
+            <div id="topics-list"></div>
+        </section>
+
+        <!-- Navigation -->
+        <nav class="nav-links">
+            <a href="/register-push.html">Register Browser for Notifications</a>
+            <a href="#" onclick="testTopic(); return false;">Test Notification</a>
+        </nav>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        // Protect this page
+        if (!requireAuth()) {
+            // Will redirect automatically
+        } else {
+            displayUserInfo();
+            loadTopics();
+        }
+
+        async function loadTopics() {
+            const loadingDiv = document.getElementById('loading');
+            const topicsListDiv = document.getElementById('topics-list');
+
+            try {
+                const topics = await apiCall('/topics', {
+                    method: 'GET'
+                });
+
+                loadingDiv.classList.add('hidden');
+
+                if (!topics || topics.length === 0) {
+                    topicsListDiv.innerHTML = `
+                        <div class="empty-state">
+                            <p>No topics yet. Create your first topic above!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                topicsListDiv.innerHTML = topics.map(topic => `
+                    <div class="list-item">
+                        <div class="list-item-content">
+                            <div class="list-item-name">${topic.name}</div>
+                            <div class="list-item-detail">
+                                Send notifications: POST /send/${topic.name}
+                            </div>
+                        </div>
+                        <div class="list-item-actions">
+                            <button onclick="copyTopicUrl('${topic.name}')" class="secondary">Copy URL</button>
+                            <button onclick="deleteTopic('${topic.name}')" class="danger">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                loadingDiv.classList.add('hidden');
+                showAlert('Failed to load topics: ' + error.message, 'error');
+            }
+        }
+
+        async function handleCreateTopic(event) {
+            event.preventDefault();
+            
+            const topicName = document.getElementById('topic-name').value.trim();
+
+            try {
+                const data = await apiCall('/topics', {
+                    method: 'POST',
+                    body: JSON.stringify({ name: topicName })
+                });
+
+                if (data) {
+                    showAlert('Topic created successfully!', 'success');
+                    document.getElementById('topic-name').value = '';
+                    loadTopics(); // Reload the list
+                }
+            } catch (error) {
+                showAlert('Failed to create topic: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteTopic(topicName) {
+            if (!confirm(`Are you sure you want to delete the topic "${topicName}"?`)) {
+                return;
+            }
+
+            showAlert('Note: DELETE endpoint not implemented in backend. Topic deletion would require adding a DELETE /topics/{name} endpoint.', 'info');
+            
+            // If delete endpoint was available:
+            // try {
+            //     await apiCall(`/topics/${topicName}`, {
+            //         method: 'DELETE'
+            //     });
+            //     showAlert('Topic deleted successfully!', 'success');
+            //     loadTopics();
+            // } catch (error) {
+            //     showAlert('Failed to delete topic: ' + error.message, 'error');
+            // }
+        }
+
+        function copyTopicUrl(topicName) {
+            const url = `${window.location.origin}/send/${topicName}`;
+            navigator.clipboard.writeText(url).then(() => {
+                showAlert('Topic URL copied to clipboard!', 'success');
+            }).catch(() => {
+                showAlert('Failed to copy URL. URL is: ' + url, 'info');
+            });
+        }
+
+        function testTopic() {
+            const topicsListDiv = document.getElementById('topics-list');
+            const firstTopic = topicsListDiv.querySelector('.list-item-name');
+            
+            if (!firstTopic) {
+                showAlert('Create a topic first before testing!', 'info');
+                return;
+            }
+
+            const topicName = firstTopic.textContent;
+            const testUrl = `${window.location.origin}/send/${topicName}`;
+            
+            showAlert(`To test notifications, make a POST request to: ${testUrl}\n\nExample: curl -X POST ${testUrl} -H "Content-Type: application/json" -d '{"title":"Test","body":"Hello!"}'`, 'info');
+        }
+    </script>
+</body>
+</html>

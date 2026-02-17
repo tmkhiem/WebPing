@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebPing - Register Browser</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 WebPing - Register Browser</h1>
+        <p class="subtitle">Register this browser to receive push notifications</p>
+
+        <div id="user-info" class="user-info"></div>
+
+        <!-- Browser Support Check -->
+        <div id="browser-check" class="alert alert-info">
+            Checking browser support for push notifications...
+        </div>
+
+        <!-- Register Push Section -->
+        <section id="register-section" class="hidden">
+            <h2>Register This Browser</h2>
+            <p style="margin-bottom: 20px; color: #666;">
+                Give this browser registration a name so you can identify it later.
+            </p>
+            <form onsubmit="handleRegisterPush(event)">
+                <div class="form-group">
+                    <label for="device-name">Device/Browser Name</label>
+                    <input 
+                        type="text" 
+                        id="device-name" 
+                        placeholder="e.g., My Laptop Chrome, iPhone Safari"
+                        required
+                    >
+                </div>
+                <button type="submit" id="register-btn">Register This Browser</button>
+            </form>
+        </section>
+
+        <!-- Registered Endpoints Section -->
+        <section class="list-container">
+            <h2>Registered Devices</h2>
+            <div id="loading" class="loading">Loading registered devices...</div>
+            <div id="endpoints-list"></div>
+        </section>
+
+        <!-- VAPID Public Key Info -->
+        <section style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 6px;">
+            <h2>About Push Notifications</h2>
+            <p style="margin-bottom: 10px;">
+                <strong>How it works:</strong>
+            </p>
+            <ol style="margin-left: 20px; color: #666;">
+                <li>Click "Register This Browser" to enable notifications for this device</li>
+                <li>Your browser will request permission to show notifications</li>
+                <li>Once registered, you'll receive notifications when topics you created are triggered</li>
+                <li>Test by sending a POST request to any of your topic endpoints</li>
+            </ol>
+            <p style="margin-top: 15px; color: #666;">
+                <strong>Note:</strong> If VAPID keys are not configured in the backend, notifications will be logged to the server console instead of being sent.
+            </p>
+        </section>
+
+        <!-- Navigation -->
+        <nav class="nav-links">
+            <a href="/topics.html">Back to Topics</a>
+        </nav>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        let pushSupported = false;
+        let serviceWorkerRegistration = null;
+
+        // Protect this page
+        if (!requireAuth()) {
+            // Will redirect automatically
+        } else {
+            displayUserInfo();
+            checkBrowserSupport();
+            loadEndpoints();
+        }
+
+        async function checkBrowserSupport() {
+            const checkDiv = document.getElementById('browser-check');
+            const registerSection = document.getElementById('register-section');
+
+            if (!('serviceWorker' in navigator)) {
+                checkDiv.innerHTML = '❌ Service Workers are not supported in this browser.';
+                checkDiv.className = 'alert alert-error';
+                return;
+            }
+
+            if (!('PushManager' in window)) {
+                checkDiv.innerHTML = '❌ Push notifications are not supported in this browser.';
+                checkDiv.className = 'alert alert-error';
+                return;
+            }
+
+            try {
+                // Register service worker
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                serviceWorkerRegistration = registration;
+                
+                checkDiv.innerHTML = '✅ Your browser supports push notifications!';
+                checkDiv.className = 'alert alert-success';
+                registerSection.classList.remove('hidden');
+                pushSupported = true;
+            } catch (error) {
+                checkDiv.innerHTML = '⚠️ Service Worker registration failed: ' + error.message;
+                checkDiv.className = 'alert alert-error';
+            }
+        }
+
+        async function handleRegisterPush(event) {
+            event.preventDefault();
+            
+            if (!pushSupported || !serviceWorkerRegistration) {
+                showAlert('Push notifications are not supported in this browser', 'error');
+                return;
+            }
+
+            const deviceName = document.getElementById('device-name').value.trim();
+            const registerBtn = document.getElementById('register-btn');
+
+            try {
+                registerBtn.disabled = true;
+                registerBtn.textContent = 'Registering...';
+
+                // Request notification permission
+                const permission = await Notification.requestPermission();
+                
+                if (permission !== 'granted') {
+                    showAlert('Notification permission was denied', 'error');
+                    return;
+                }
+
+                // Subscribe to push notifications
+                // Note: This uses a dummy VAPID key - in production, get the real key from the server
+                const subscription = await serviceWorkerRegistration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(
+                        'BEl62iUYgUivxIkv69yViEuiBIa-Ib37J8xQmrYj-PYqTU1BNfQDy94sESfKWIH9sVBJOLLVQWcmTqQ2-3tQISk'
+                    )
+                });
+
+                // Extract subscription details
+                const subscriptionJSON = subscription.toJSON();
+                
+                // Register with backend
+                const data = await apiCall('/push-endpoints', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        name: deviceName,
+                        endpoint: subscriptionJSON.endpoint,
+                        p256dh: subscriptionJSON.keys.p256dh,
+                        auth: subscriptionJSON.keys.auth
+                    })
+                });
+
+                if (data) {
+                    showAlert('Browser registered successfully! You will now receive notifications.', 'success');
+                    document.getElementById('device-name').value = '';
+                    loadEndpoints();
+                }
+            } catch (error) {
+                showAlert('Failed to register browser: ' + error.message, 'error');
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Register This Browser';
+            }
+        }
+
+        async function loadEndpoints() {
+            const loadingDiv = document.getElementById('loading');
+            const endpointsListDiv = document.getElementById('endpoints-list');
+
+            try {
+                const endpoints = await apiCall('/push-endpoints', {
+                    method: 'GET'
+                });
+
+                loadingDiv.classList.add('hidden');
+
+                if (!endpoints || endpoints.length === 0) {
+                    endpointsListDiv.innerHTML = `
+                        <div class="empty-state">
+                            <p>No devices registered yet. Register this browser above!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                endpointsListDiv.innerHTML = endpoints.map(endpoint => `
+                    <div class="list-item">
+                        <div class="list-item-content">
+                            <div class="list-item-name">${endpoint.name}</div>
+                            <div class="list-item-detail">
+                                Endpoint: ${endpoint.endpoint.substring(0, 50)}...
+                            </div>
+                        </div>
+                        <div class="list-item-actions">
+                            <button onclick="deleteEndpoint(${endpoint.id})" class="danger">Remove</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                loadingDiv.classList.add('hidden');
+                showAlert('Failed to load registered devices: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteEndpoint(endpointId) {
+            if (!confirm('Are you sure you want to remove this device?')) {
+                return;
+            }
+
+            showAlert('Note: DELETE endpoint not implemented in backend. Endpoint deletion would require adding a DELETE /push-endpoints/{id} endpoint.', 'info');
+            
+            // If delete endpoint was available:
+            // try {
+            //     await apiCall(`/push-endpoints/${endpointId}`, {
+            //         method: 'DELETE'
+            //     });
+            //     showAlert('Device removed successfully!', 'success');
+            //     loadEndpoints();
+            // } catch (error) {
+            //     showAlert('Failed to remove device: ' + error.message, 'error');
+            // }
+        }
+
+        // Convert VAPID key from base64 to Uint8Array
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/\-/g, '+')
+                .replace(/_/g, '/');
+
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+    </script>
+</body>
+</html>
