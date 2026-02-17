@@ -70,6 +70,16 @@
 
     <script src="/js/api.js"></script>
     <script>
+        // HTML escape function to prevent XSS
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         let pushSupported = false;
         let serviceWorkerRegistration = null;
 
@@ -137,7 +147,8 @@
                 }
 
                 // Subscribe to push notifications
-                // Note: This uses a dummy VAPID key - in production, get the real key from the server
+                // NOTE: This uses a demo VAPID public key. In production, fetch the real key from the server
+                // via an API endpoint to allow key rotation without redeploying the frontend.
                 const subscription = await serviceWorkerRegistration.pushManager.subscribe({
                     userVisibleOnly: true,
                     applicationServerKey: urlBase64ToUint8Array(
@@ -193,18 +204,23 @@
                 }
 
                 endpointsListDiv.innerHTML = endpoints.map(endpoint => `
-                    <div class="list-item">
+                    <div class="list-item" data-endpoint-id="${endpoint.id}">
                         <div class="list-item-content">
-                            <div class="list-item-name">${endpoint.name}</div>
+                            <div class="list-item-name">${escapeHtml(endpoint.name)}</div>
                             <div class="list-item-detail">
-                                Endpoint: ${endpoint.endpoint.substring(0, 50)}...
+                                Endpoint: ${escapeHtml(endpoint.endpoint.substring(0, 50))}...
                             </div>
                         </div>
                         <div class="list-item-actions">
-                            <button onclick="deleteEndpoint(${endpoint.id})" class="danger">Remove</button>
+                            <button class="delete-endpoint-btn danger">Remove</button>
                         </div>
                     </div>
                 `).join('');
+
+                // Attach event listeners programmatically to avoid XSS
+                document.querySelectorAll('.delete-endpoint-btn').forEach((btn, index) => {
+                    btn.addEventListener('click', () => deleteEndpoint(endpoints[index].id));
+                });
             } catch (error) {
                 loadingDiv.classList.add('hidden');
                 showAlert('Failed to load registered devices: ' + error.message, 'error');

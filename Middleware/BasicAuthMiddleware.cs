@@ -14,19 +14,13 @@ public class BasicAuthMiddleware
 
     public async Task InvokeAsync(HttpContext context, IAuthService authService)
     {
-        // Skip auth for register, login, send endpoints, and static files
         var path = context.Request.Path.Value?.ToLower() ?? "";
+        
+        // Skip auth for specific endpoints and static files from wwwroot
         if (path.Contains("/auth/register") || 
             path.Contains("/auth/login") || 
             path.StartsWith("/send/") ||
-            path.EndsWith(".html") ||
-            path.EndsWith(".css") ||
-            path.EndsWith(".js") ||
-            path.EndsWith(".ico") ||
-            path.EndsWith(".png") ||
-            path.EndsWith(".jpg") ||
-            path.EndsWith(".svg") ||
-            path == "/")
+            IsStaticFile(path))
         {
             await _next(context);
             return;
@@ -83,5 +77,14 @@ public class BasicAuthMiddleware
             context.Response.StatusCode = 401;
             await context.Response.WriteAsync("Unauthorized");
         }
+    }
+
+    private static bool IsStaticFile(string path)
+    {
+        // Only allow static files with common extensions or root path
+        if (path == "/") return true;
+        
+        var staticExtensions = new[] { ".html", ".css", ".js", ".ico", ".png", ".jpg", ".jpeg", ".svg", ".gif", ".woff", ".woff2", ".ttf", ".eot" };
+        return staticExtensions.Any(ext => path.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
     }
 }

@@ -1,5 +1,8 @@
 // WebPing API Utilities
 
+// Constants
+const ALERT_DURATION_MS = 5000;
+
 // Get credentials from localStorage
 function getCredentials() {
     const username = localStorage.getItem('username');
@@ -34,6 +37,10 @@ function logout() {
 
 // Save credentials
 function saveCredentials(username, password) {
+    // NOTE: Storing passwords in localStorage is not recommended for production
+    // as it's vulnerable to XSS attacks. This is acceptable for a demo where
+    // Basic Auth is used anyway (credentials sent with every request).
+    // For production, consider using HttpOnly cookies with session tokens.
     localStorage.setItem('username', username);
     localStorage.setItem('password', password);
 }
@@ -92,10 +99,10 @@ function showAlert(message, type = 'info') {
     const firstChild = container.firstChild;
     container.insertBefore(alertDiv, firstChild);
     
-    // Auto-remove after 5 seconds
+    // Auto-remove after configured duration
     setTimeout(() => {
         alertDiv.remove();
-    }, 5000);
+    }, ALERT_DURATION_MS);
 }
 
 // Protect page - require authentication

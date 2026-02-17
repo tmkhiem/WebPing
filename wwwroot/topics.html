@@ -49,6 +49,16 @@
 
     <script src="/js/api.js"></script>
     <script>
+        // HTML escape function to prevent XSS
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         // Protect this page
         if (!requireAuth()) {
             // Will redirect automatically
@@ -78,19 +88,27 @@
                 }
 
                 topicsListDiv.innerHTML = topics.map(topic => `
-                    <div class="list-item">
+                    <div class="list-item" data-topic-name="${escapeHtml(topic.name)}">
                         <div class="list-item-content">
-                            <div class="list-item-name">${topic.name}</div>
+                            <div class="list-item-name">${escapeHtml(topic.name)}</div>
                             <div class="list-item-detail">
-                                Send notifications: POST /send/${topic.name}
+                                Send notifications: POST /send/${escapeHtml(topic.name)}
                             </div>
                         </div>
                         <div class="list-item-actions">
-                            <button onclick="copyTopicUrl('${topic.name}')" class="secondary">Copy URL</button>
-                            <button onclick="deleteTopic('${topic.name}')" class="danger">Delete</button>
+                            <button class="copy-url-btn secondary">Copy URL</button>
+                            <button class="delete-btn danger">Delete</button>
                         </div>
                     </div>
                 `).join('');
+
+                // Attach event listeners programmatically to avoid XSS
+                document.querySelectorAll('.copy-url-btn').forEach((btn, index) => {
+                    btn.addEventListener('click', () => copyTopicUrl(topics[index].name));
+                });
+                document.querySelectorAll('.delete-btn').forEach((btn, index) => {
+                    btn.addEventListener('click', () => deleteTopic(topics[index].name));
+                });
             } catch (error) {
                 loadingDiv.classList.add('hidden');
                 showAlert('Failed to load topics: ' + error.message, 'error');
