@@ -12,10 +12,12 @@ public class WebPushService : IWebPushService
     private readonly IConfiguration _configuration;
     private readonly WebPushClient _webPushClient;
     private readonly bool _vapidConfigured;
+    private readonly ILogger<WebPushService> _logger;
 
-    public WebPushService(IConfiguration configuration)
+    public WebPushService(IConfiguration configuration, ILogger<WebPushService> logger)
     {
         _configuration = configuration;
+        _logger = logger;
         _webPushClient = new WebPushClient();
 
         var vapidPublicKey = _configuration["VapidKeys:PublicKey"];
@@ -33,13 +35,15 @@ public class WebPushService : IWebPushService
                 _webPushClient.SetVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
                 _vapidConfigured = true;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogWarning(ex, "Failed to configure VAPID keys. Running in demo mode.");
                 _vapidConfigured = false;
             }
         }
         else
         {
+            _logger.LogInformation("VAPID keys not configured. Running in demo mode.");
             _vapidConfigured = false;
         }
     }
@@ -49,9 +53,8 @@ public class WebPushService : IWebPushService
         if (!_vapidConfigured)
         {
             // For testing/demo purposes, just log that we would send a notification
-            // In production, this should throw or require proper VAPID configuration
-            Console.WriteLine($"[Demo Mode] Would send notification to {endpoint}");
-            Console.WriteLine($"Payload: {payload}");
+            _logger.LogInformation("[Demo Mode] Would send notification to {Endpoint}", endpoint);
+            _logger.LogInformation("Payload: {Payload}", payload);
             return;
         }
 
@@ -62,7 +65,7 @@ public class WebPushService : IWebPushService
         }
         catch (WebPushException ex)
         {
-            // Log the error or handle it appropriately
+            _logger.LogError(ex, "Failed to send push notification to {Endpoint}", endpoint);
             throw new Exception($"Failed to send push notification: {ex.Message}", ex);
         }
     }

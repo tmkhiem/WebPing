@@ -169,7 +169,6 @@ app.MapPost("/send/{topicName}", async (string topicName, SendNotificationReques
 
     // Send to all push endpoints for this user
     var pushEndpoints = topic.User?.PushEndpoints ?? new List<PushEndpoint>();
-    var sendTasks = new List<Task>();
     var results = new List<object>();
 
     foreach (var endpoint in pushEndpoints)

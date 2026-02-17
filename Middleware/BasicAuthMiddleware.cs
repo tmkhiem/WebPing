@@ -38,31 +38,40 @@ public class BasicAuthMiddleware
             return;
         }
 
-        var encodedCredentials = authHeader.Substring("Basic ".Length).Trim();
-        var credentials = Encoding.UTF8.GetString(Convert.FromBase64String(encodedCredentials));
-        var parts = credentials.Split(':', 2);
-
-        if (parts.Length != 2)
+        try
         {
+            var encodedCredentials = authHeader.Substring("Basic ".Length).Trim();
+            var credentials = Encoding.UTF8.GetString(Convert.FromBase64String(encodedCredentials));
+            var parts = credentials.Split(':', 2);
+
+            if (parts.Length != 2)
+            {
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsync("Unauthorized");
+                return;
+            }
+
+            var username = parts[0];
+            var password = parts[1];
+
+            var user = await authService.LoginAsync(username, password);
+            if (user == null)
+            {
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsync("Unauthorized");
+                return;
+            }
+
+            // Store username in HttpContext items for later use
+            context.Items["Username"] = username;
+
+            await _next(context);
+        }
+        catch (FormatException)
+        {
+            // Invalid Base64 string
             context.Response.StatusCode = 401;
             await context.Response.WriteAsync("Unauthorized");
-            return;
         }
-
-        var username = parts[0];
-        var password = parts[1];
-
-        var user = await authService.LoginAsync(username, password);
-        if (user == null)
-        {
-            context.Response.StatusCode = 401;
-            await context.Response.WriteAsync("Unauthorized");
-            return;
-        }
-
-        // Store username in HttpContext items for later use
-        context.Items["Username"] = username;
-
-        await _next(context);
     }
 }
