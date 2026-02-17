@@ -14,9 +14,19 @@ public class BasicAuthMiddleware
 
     public async Task InvokeAsync(HttpContext context, IAuthService authService)
     {
-        // Skip auth for register, login, and send endpoints
+        // Skip auth for register, login, send endpoints, and static files
         var path = context.Request.Path.Value?.ToLower() ?? "";
-        if (path.Contains("/auth/register") || path.Contains("/auth/login") || path.StartsWith("/send/"))
+        if (path.Contains("/auth/register") || 
+            path.Contains("/auth/login") || 
+            path.StartsWith("/send/") ||
+            path.EndsWith(".html") ||
+            path.EndsWith(".css") ||
+            path.EndsWith(".js") ||
+            path.EndsWith(".ico") ||
+            path.EndsWith(".png") ||
+            path.EndsWith(".jpg") ||
+            path.EndsWith(".svg") ||
+            path == "/")
         {
             await _next(context);
             return;

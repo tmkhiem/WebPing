@@ -37,6 +37,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Serve static files (HTML, CSS, JS)
+app.UseDefaultFiles(); // Serve index.html by default - must be before UseStaticFiles
 app.UseStaticFiles();
 
 // Add authentication middleware
