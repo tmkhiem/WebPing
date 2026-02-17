@@ -14,9 +14,9 @@ public class BasicAuthMiddleware
 
     public async Task InvokeAsync(HttpContext context, IAuthService authService)
     {
-        // Skip auth for register and login endpoints
+        // Skip auth for register, login, and send endpoints
         var path = context.Request.Path.Value?.ToLower() ?? "";
-        if (path.Contains("/auth/register") || path.Contains("/auth/login"))
+        if (path.Contains("/auth/register") || path.Contains("/auth/login") || path.StartsWith("/send/"))
         {
             await _next(context);
             return;
