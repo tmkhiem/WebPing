@@ -5,6 +5,14 @@ using WebPing.DTOs;
 using WebPing.Middleware;
 using WebPing.Models;
 using WebPing.Services;
+using WebPush;
+
+// Check for command-line flags
+if (args.Length > 0 && args[0] == "--generate-vapid-keys")
+{
+    GenerateVapidKeys();
+    return;
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -148,6 +156,28 @@ app.MapGet("/push-endpoints", async (HttpContext context, WebPingDbContext dbCon
     return Results.Ok(endpoints);
 });
 
+app.MapDelete("/push-endpoints/{id}", async (int id, HttpContext context, WebPingDbContext dbContext) =>
+{
+    var username = context.Items["Username"]?.ToString();
+    if (string.IsNullOrEmpty(username))
+    {
+        return Results.Unauthorized();
+    }
+
+    var endpoint = await dbContext.PushEndpoints
+        .FirstOrDefaultAsync(p => p.Id == id && p.Username == username);
+
+    if (endpoint == null)
+    {
+        return Results.NotFound(new { message = "Push endpoint not found" });
+    }
+
+    dbContext.PushEndpoints.Remove(endpoint);
+    await dbContext.SaveChangesAsync();
+
+    return Results.Ok(new { message = "Push endpoint deleted successfully" });
+});
+
 // Send notification endpoint
 app.MapPost("/send/{topicName}", async (string topicName, SendNotificationRequest request, WebPingDbContext dbContext, IWebPushService webPushService) =>
 {
@@ -192,3 +222,93 @@ app.MapPost("/send/{topicName}", async (string topicName, SendNotificationReques
 });
 
 app.Run();
+
+// Function to generate VAPID keys
+static void GenerateVapidKeys()
+{
+    Console.WriteLine("=== VAPID Key Generation ===");
+    Console.WriteLine();
+    
+    // Request email from user
+    Console.Write("Enter your email address (e.g., mailto:admin@example.com): ");
+    var email = Console.ReadLine()?.Trim() ?? "";
+    
+    // Validate email format
+    if (string.IsNullOrEmpty(email))
+    {
+        Console.WriteLine("Error: Email address is required.");
+        Environment.Exit(1);
+    }
+    
+    // Add mailto: prefix if not present
+    if (!email.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase))
+    {
+        email = $"mailto:{email}";
+    }
+    
+    // Generate VAPID keys
+    Console.WriteLine();
+    Console.WriteLine("Generating VAPID keys...");
+    var vapidKeys = VapidHelper.GenerateVapidKeys();
+    
+    // Create JSON structure
+    var vapidConfig = new
+    {
+        VapidKeys = new
+        {
+            Subject = email,
+            PublicKey = vapidKeys.PublicKey,
+            PrivateKey = vapidKeys.PrivateKey
+        }
+    };
+    
+    var jsonOptions = new JsonSerializerOptions 
+    { 
+        WriteIndented = true 
+    };
+    var jsonOutput = JsonSerializer.Serialize(vapidConfig, jsonOptions);
+    
+    // Print the JSON
+    Console.WriteLine();
+    Console.WriteLine("Generated VAPID Keys:");
+    Console.WriteLine("====================");
+    Console.WriteLine(jsonOutput);
+    Console.WriteLine();
+    
+    // Update appsettings.json
+    var appsettingsPath = "appsettings.json";
+    
+    try
+    {
+        if (File.Exists(appsettingsPath))
+        {
+            // Read existing appsettings.json
+            var existingJson = File.ReadAllText(appsettingsPath);
+            var existingConfig = JsonSerializer.Deserialize<Dictionary<string, object>>(existingJson);
+            
+            if (existingConfig != null)
+            {
+                // Update VapidKeys section
+                existingConfig["VapidKeys"] = JsonSerializer.SerializeToElement(vapidConfig.VapidKeys);
+                
+                // Write back to file
+                var updatedJson = JsonSerializer.Serialize(existingConfig, jsonOptions);
+                File.WriteAllText(appsettingsPath, updatedJson);
+                
+                Console.WriteLine($"✓ VAPID keys saved to {appsettingsPath}");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"Warning: {appsettingsPath} not found. Keys not saved to file.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Warning: Failed to update {appsettingsPath}: {ex.Message}");
+        Console.WriteLine("You can manually copy the JSON above to your appsettings.json file.");
+    }
+    
+    Console.WriteLine();
+    Console.WriteLine("Setup complete! You can now use these VAPID keys for push notifications.");
+}
