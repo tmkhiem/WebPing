@@ -284,7 +284,7 @@ static void GenerateVapidKeys()
         {
             // Read existing appsettings.json
             var existingJson = File.ReadAllText(appsettingsPath);
-            var existingConfig = JsonSerializer.Deserialize<Dictionary<string, object>>(existingJson);
+            var existingConfig = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(existingJson);
             
             if (existingConfig != null)
             {

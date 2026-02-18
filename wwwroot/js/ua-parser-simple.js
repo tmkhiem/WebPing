@@ -9,17 +9,17 @@ function parseUserAgent() {
         device: { type: 'desktop' }
     };
 
-    // Detect browser
-    if (ua.indexOf('Firefox') > -1) {
-        result.browser.name = 'Firefox';
-    } else if (ua.indexOf('Chrome') > -1 && ua.indexOf('Edge') === -1 && ua.indexOf('Edg') === -1) {
-        result.browser.name = 'Chrome';
+    // Detect browser - order matters! Check more specific browsers first
+    if (ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1) {
+        result.browser.name = 'Opera';
     } else if (ua.indexOf('Edg') > -1 || ua.indexOf('Edge') > -1) {
         result.browser.name = 'Edge';
-    } else if (ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') === -1) {
+    } else if (ua.indexOf('Chrome') > -1) {
+        result.browser.name = 'Chrome';
+    } else if (ua.indexOf('Safari') > -1) {
         result.browser.name = 'Safari';
-    } else if (ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1) {
-        result.browser.name = 'Opera';
+    } else if (ua.indexOf('Firefox') > -1) {
+        result.browser.name = 'Firefox';
     }
 
     // Detect OS
