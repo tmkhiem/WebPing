@@ -240,6 +240,17 @@ static void GenerateVapidKeys()
         Environment.Exit(1);
     }
     
+    // Basic email validation
+    var emailToValidate = email.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase) 
+        ? email.Substring(7) 
+        : email;
+    
+    if (!emailToValidate.Contains("@") || !emailToValidate.Contains(".") || emailToValidate.Length < 5)
+    {
+        Console.WriteLine("Error: Invalid email address format. Please provide a valid email (e.g., admin@example.com).");
+        Environment.Exit(1);
+    }
+    
     // Add mailto: prefix if not present
     if (!email.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase))
     {
