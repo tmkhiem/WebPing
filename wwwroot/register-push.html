@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebPing - Register Browser</title>
     <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/ua-parser-simple.js"></script>
 </head>
 <body>
     <div class="container">
@@ -90,6 +91,40 @@
             displayUserInfo();
             checkBrowserSupport();
             loadEndpoints();
+            autofillDeviceName();
+        }
+
+        function autofillDeviceName() {
+            try {
+                // Use UAParser to detect browser and OS
+                const parser = new UAParser();
+                const result = parser.getResult();
+                
+                // Build a descriptive device name
+                const browserName = result.browser.name || 'Unknown Browser';
+                const osName = result.os.name || 'Unknown OS';
+                const deviceType = result.device.type || 'desktop';
+                
+                let deviceName = '';
+                if (deviceType === 'mobile' || deviceType === 'tablet') {
+                    // For mobile/tablet, include device vendor if available
+                    const deviceVendor = result.device.vendor || '';
+                    const deviceModel = result.device.model || '';
+                    deviceName = `${deviceVendor} ${deviceModel} ${browserName}`.trim();
+                } else {
+                    // For desktop, use OS + Browser
+                    deviceName = `${osName} - ${browserName}`;
+                }
+                
+                // Set the auto-detected name in the input field
+                const deviceNameInput = document.getElementById('device-name');
+                if (deviceNameInput && deviceName) {
+                    deviceNameInput.value = deviceName;
+                }
+            } catch (error) {
+                console.error('Failed to auto-detect device name:', error);
+                // If UAParser fails, just use a basic fallback
+            }
         }
 
         async function checkBrowserSupport() {
@@ -232,18 +267,15 @@
                 return;
             }
 
-            showAlert('Note: DELETE endpoint not implemented in backend. Endpoint deletion would require adding a DELETE /push-endpoints/{id} endpoint.', 'info');
-            
-            // If delete endpoint was available:
-            // try {
-            //     await apiCall(`/push-endpoints/${endpointId}`, {
-            //         method: 'DELETE'
-            //     });
-            //     showAlert('Device removed successfully!', 'success');
-            //     loadEndpoints();
-            // } catch (error) {
-            //     showAlert('Failed to remove device: ' + error.message, 'error');
-            // }
+            try {
+                await apiCall(`/push-endpoints/${endpointId}`, {
+                    method: 'DELETE'
+                });
+                showAlert('Device removed successfully!', 'success');
+                loadEndpoints();
+            } catch (error) {
+                showAlert('Failed to remove device: ' + error.message, 'error');
+            }
         }
 
         // Convert VAPID key from base64 to Uint8Array
