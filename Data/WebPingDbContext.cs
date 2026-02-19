@@ -40,5 +40,10 @@ public class WebPingDbContext : DbContext
         // PushEndpoint configuration
         modelBuilder.Entity<PushEndpoint>()
             .HasKey(p => p.Id);
+        
+        // Add unique constraint on Endpoint + Username combination
+        modelBuilder.Entity<PushEndpoint>()
+            .HasIndex(p => new { p.Endpoint, p.Username })
+            .IsUnique();
     }
 }

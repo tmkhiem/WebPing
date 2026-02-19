@@ -1,4 +1,5 @@
 using System.Text;
+using WebPing.Extensions;
 using WebPing.Services;
 
 namespace WebPing.Middleware;
@@ -16,11 +17,19 @@ public class BasicAuthMiddleware
     {
         var path = context.Request.Path.Value?.ToLower() ?? "";
         
-        // Skip auth for specific endpoints and static files from wwwroot
-        if (path.Contains("/auth/register") || 
-            path.Contains("/auth/login") || 
-            path.StartsWith("/send/") ||
-            IsStaticFile(path))
+        // Skip auth for static files from wwwroot
+        if (IsStaticFile(path))
+        {
+            await _next(context);
+            return;
+        }
+
+        // Check if the endpoint requires authentication via metadata
+        var endpoint = context.GetEndpoint();
+        var requiresAuth = endpoint?.Metadata.GetMetadata<RequireAuthAttribute>() != null;
+
+        // If endpoint doesn't require auth, skip authentication
+        if (!requiresAuth)
         {
             await _next(context);
             return;

@@ -181,14 +181,20 @@
                     return;
                 }
 
-                // Subscribe to push notifications
-                // NOTE: This uses a demo VAPID public key. In production, fetch the real key from the server
-                // via an API endpoint to allow key rotation without redeploying the frontend.
+                // Fetch VAPID public key from backend
+                const vapidResponse = await apiCall('/vapid-public-key', {
+                    method: 'GET'
+                });
+                
+                if (!vapidResponse || !vapidResponse.configured || !vapidResponse.publicKey) {
+                    showAlert('VAPID keys are not configured on the server. Cannot register for push notifications.', 'error');
+                    return;
+                }
+
+                // Subscribe to push notifications using the fetched VAPID public key
                 const subscription = await serviceWorkerRegistration.pushManager.subscribe({
                     userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(
-                        'BEl62iUYgUivxIkv69yViEuiBIa-Ib37J8xQmrYj-PYqTU1BNfQDy94sESfKWIH9sVBJOLLVQWcmTqQ2-3tQISk'
-                    )
+                    applicationServerKey: urlBase64ToUint8Array(vapidResponse.publicKey)
                 });
 
                 // Extract subscription details

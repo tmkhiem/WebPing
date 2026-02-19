@@ -1,4 +1,5 @@
 using WebPush;
+using WebPing.Constants;
 
 namespace WebPing.Services;
 
@@ -27,8 +28,8 @@ public class WebPushService : IWebPushService
         // Only set VAPID details if keys are properly configured
         if (!string.IsNullOrEmpty(vapidPublicKey) && 
             !string.IsNullOrEmpty(vapidPrivateKey) &&
-            vapidPublicKey != "YOUR_VAPID_PUBLIC_KEY" &&
-            vapidPrivateKey != "YOUR_VAPID_PRIVATE_KEY")
+            vapidPublicKey != VapidConstants.PlaceholderPublicKey &&
+            vapidPrivateKey != VapidConstants.PlaceholderPrivateKey)
         {
             try
             {
