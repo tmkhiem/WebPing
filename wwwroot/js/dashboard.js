@@ -216,11 +216,7 @@ function createTopicCard(topic) {
                 </div>
             </div>
             <div class="topic-card-body hidden">
-                <div class="topic-endpoint">
-                    <code>${endpoint}</code>
-                </div>
-                <div class="topic-card-expanded">
-                    <div class="code-tabs">
+                <div class="code-tabs">
                         <button class="code-tab active" onclick="switchCodeTab(event, '${topicName}', 'curl-cmd')">curl (cmd)</button>
                         <button class="code-tab" onclick="switchCodeTab(event, '${topicName}', 'curl-bash')">curl (bash)</button>
                         <button class="code-tab" onclick="switchCodeTab(event, '${topicName}', 'powershell')">PowerShell</button>
@@ -270,7 +266,6 @@ var result = await response.Content.ReadAsStringAsync();</code></pre>
                     </div>
                 </div>
             </div>
-        </div>
     `;
 }
 

@@ -517,20 +517,6 @@ button.danger:hover {
     padding: 16px;
 }
 
-.topic-endpoint {
-    margin-bottom: 12px;
-}
-
-.topic-endpoint code {
-    display: block;
-    padding: 8px 12px;
-    background: var(--background-gray);
-    border-radius: 4px;
-    font-size: 13px;
-    color: var(--text-primary);
-    overflow-x: auto;
-}
-
 /* Code Tabs */
 .code-tabs {
     display: flex;
