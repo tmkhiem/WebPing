@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WebPing.Constants;
 using WebPing.Data;
 using WebPing.DTOs;
+using WebPing.Extensions;
 using WebPing.Models;
 using WebPing.Services;
 
@@ -54,8 +55,8 @@ public static class NotificationEndpoints
             return Results.Ok(new { message = "Notifications sent", results });
         });
 
-        // VAPID public key endpoint - intentionally public (no RequireAuth)
-        // This must be accessible to unauthenticated users for push subscription setup
+        // VAPID public key endpoint - requires authentication
+        // Users must be logged in to register browsers for push notifications
         app.MapGet("/vapid-public-key", (IConfiguration configuration) =>
         {
             var publicKey = configuration["VapidKeys:PublicKey"];
@@ -66,6 +67,6 @@ public static class NotificationEndpoints
             }
             
             return Results.Ok(new { publicKey, configured = true });
-        });
+        }).RequireAuth();
     }
 }

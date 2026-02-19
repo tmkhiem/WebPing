@@ -183,8 +183,7 @@
 
                 // Fetch VAPID public key from backend
                 const vapidResponse = await apiCall('/vapid-public-key', {
-                    method: 'GET',
-                    skipAuth: true
+                    method: 'GET'
                 });
                 
                 if (!vapidResponse || !vapidResponse.configured || !vapidResponse.publicKey) {
