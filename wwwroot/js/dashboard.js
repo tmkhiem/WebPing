@@ -164,7 +164,7 @@ async function loadTopics() {
         if (!topics || topics.length === 0) {
             topicsContainer.innerHTML = `
                 <div class="empty-state">
-                    <span class="material-symbols-outlined">topic</span>
+                    <span class="material-symbols-outlined">line_start_circle</span>
                     <p>No topics yet. Create your first topic above!</p>
                 </div>
             `;
@@ -203,7 +203,7 @@ function createTopicCard(topic) {
         <div class="topic-card" data-topic="${topicName}">
             <div class="topic-card-header">
                 <div class="topic-card-title">
-                    <span class="material-symbols-outlined">topic</span>
+                    <span class="material-symbols-outlined">line_start_circle</span>
                     ${topicName}
                 </div>
                 <div class="topic-card-actions">
@@ -215,14 +215,10 @@ function createTopicCard(topic) {
                     </button>
                 </div>
             </div>
-            <div class="topic-card-body">
-                <div class="topic-endpoint">
-                    <code>${endpoint}</code>
-                </div>
-                <div class="topic-card-expanded hidden">
-                    <div class="code-tabs">
-                        <button class="code-tab active" onclick="switchCodeTab(event, '${topicName}', 'curl-cmd')">CMD (curl)</button>
-                        <button class="code-tab" onclick="switchCodeTab(event, '${topicName}', 'curl-bash')">Bash (curl)</button>
+            <div class="topic-card-body hidden">
+                <div class="code-tabs">
+                        <button class="code-tab active" onclick="switchCodeTab(event, '${topicName}', 'curl-cmd')">curl (cmd)</button>
+                        <button class="code-tab" onclick="switchCodeTab(event, '${topicName}', 'curl-bash')">curl (bash)</button>
                         <button class="code-tab" onclick="switchCodeTab(event, '${topicName}', 'powershell')">PowerShell</button>
                         <button class="code-tab" onclick="switchCodeTab(event, '${topicName}', 'python')">Python</button>
                         <button class="code-tab" onclick="switchCodeTab(event, '${topicName}', 'csharp')">C#</button>
@@ -270,7 +266,6 @@ var result = await response.Content.ReadAsStringAsync();</code></pre>
                     </div>
                 </div>
             </div>
-        </div>
     `;
 }
 
@@ -291,11 +286,11 @@ function toggleTopicExpand(topicName) {
     const card = document.querySelector(`[data-topic="${topicName}"]`);
     if (!card) return;
     
-    const expandedSection = card.querySelector('.topic-card-expanded');
+    const cardBody = card.querySelector('.topic-card-body');
     const expandBtn = card.querySelector('.topic-expand-btn span');
     
-    expandedSection.classList.toggle('hidden');
-    expandBtn.textContent = expandedSection.classList.contains('hidden') ? 'code' : 'code_off';
+    cardBody.classList.toggle('hidden');
+    expandBtn.textContent = cardBody.classList.contains('hidden') ? 'code' : 'code_off';
 }
 
 async function handleCreateTopic(event) {
@@ -319,9 +314,21 @@ async function handleCreateTopic(event) {
 }
 
 async function deleteTopic(topicName) {
-    // Note: Topic deletion endpoint is not implemented in the backend
-    // The delete button is shown for future functionality
-    showAlert('Topic deletion not yet implemented', 'info');
+    if (!confirm(`Are you sure you want to delete the topic "${topicName}"?`)) {
+        return;
+    }
+    
+    try {
+        await apiCall(`/topics/${encodeURIComponent(topicName)}`, {
+            method: 'DELETE'
+        });
+        
+        showAlert('Topic deleted successfully!', 'success');
+        loadTopics();
+        loadDashboardStats();
+    } catch (error) {
+        showAlert('Failed to delete topic: ' + error.message, 'error');
+    }
 }
 
 // Subscriptions functionality

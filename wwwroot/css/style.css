@@ -517,20 +517,6 @@ button.danger:hover {
     padding: 16px;
 }
 
-.topic-endpoint {
-    margin-bottom: 12px;
-}
-
-.topic-endpoint code {
-    display: block;
-    padding: 8px 12px;
-    background: var(--background-gray);
-    border-radius: 4px;
-    font-size: 13px;
-    color: var(--text-primary);
-    overflow-x: auto;
-}
-
 /* Code Tabs */
 .code-tabs {
     display: flex;
@@ -547,6 +533,7 @@ button.danger:hover {
     font-size: 12px;
     cursor: pointer;
     transition: all 0.2s;
+    color: #000;
 }
 
 .code-tab:hover {
@@ -554,35 +541,30 @@ button.danger:hover {
 }
 
 .code-tab.active {
-    background: #333;
     color: white;
-    border-color: var(--text-primary);
-}
-
-.code-tab.active:hover {
-    background: #444;
+    border-color: #000;
 }
 
 /* Accent colors for different languages */
-.code-tab:nth-child(1).active, /* CMD */
-.code-tab:nth-child(2).active { /* Bash */
+.code-tab:nth-child(1).active, /* curl (cmd) */
+.code-tab:nth-child(2).active { /* curl (bash) */
     background: #000;
-    border-color: #000;
+    color: white;
 }
 
 .code-tab:nth-child(3).active { /* PowerShell */
     background: #012456;
-    border-color: #012456;
+    color: white;
 }
 
 .code-tab:nth-child(4).active { /* Python */
-    background: #3776ab;
-    border-color: #3776ab;
+    background: #ffd43b;
+    color: #306998;
 }
 
 .code-tab:nth-child(5).active { /* C# */
     background: #239120;
-    border-color: #239120;
+    color: white;
 }
 
 .code-content {
@@ -775,4 +757,144 @@ button.danger:hover {
 
 .auth-toggle a:hover {
     text-decoration: underline;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
+    
+    .container {
+        border-radius: 0;
+        margin-top: 0;
+        padding: 20px;
+        min-height: 100vh;
+    }
+    
+    .dashboard-container {
+        border-radius: 0;
+    }
+    
+    .dashboard-header {
+        padding: 15px 20px;
+        flex-wrap: wrap;
+    }
+    
+    .header-title h1 {
+        font-size: 20px;
+    }
+    
+    .tab-nav {
+        padding: 0 20px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .tab-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+    
+    .tab-content {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 24px;
+    }
+    
+    h2 {
+        font-size: 18px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .inline-form {
+        flex-direction: column;
+    }
+    
+    .inline-form button {
+        width: 100%;
+    }
+    
+    .topic-card-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .topic-card-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .list-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .list-item-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .device-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .device-card button {
+        align-self: flex-end;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .code-tabs {
+        gap: 6px;
+    }
+    
+    .code-tab {
+        font-size: 11px;
+        padding: 5px 10px;
+    }
+    
+    .code-panel pre {
+        font-size: 12px;
+        padding: 12px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .tab-content {
+        padding: 15px;
+    }
+    
+    .dashboard-header {
+        padding: 10px 15px;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    button {
+        width: 100%;
+    }
 }
