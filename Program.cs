@@ -125,6 +125,15 @@ app.MapPost("/push-endpoints", async (RegisterPushEndpointRequest request, HttpC
         return Results.Unauthorized();
     }
 
+    // Check if this endpoint is already registered for this user
+    var existingEndpoint = await dbContext.PushEndpoints
+        .FirstOrDefaultAsync(p => p.Endpoint == request.Endpoint && p.Username == username);
+    
+    if (existingEndpoint != null)
+    {
+        return Results.BadRequest(new { message = "This browser is already registered" });
+    }
+
     var endpoint = new PushEndpoint
     {
         Name = request.Name,
