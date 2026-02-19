@@ -93,11 +93,32 @@ async function apiCall(endpoint, options = {}) {
 function showAlert(message, type = 'info') {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type}`;
-    alertDiv.textContent = message;
     
-    const container = document.querySelector('.container');
-    const firstChild = container.firstChild;
-    container.insertBefore(alertDiv, firstChild);
+    // Add icon based on type
+    const icon = document.createElement('span');
+    icon.className = 'material-symbols-outlined';
+    if (type === 'success') {
+        icon.textContent = 'check_circle';
+    } else if (type === 'error') {
+        icon.textContent = 'error';
+    } else {
+        icon.textContent = 'info';
+    }
+    
+    alertDiv.appendChild(icon);
+    alertDiv.appendChild(document.createTextNode(' ' + message));
+    
+    // Try to find alert container first (dashboard), otherwise use container
+    let container = document.getElementById('alert-container');
+    if (!container) {
+        container = document.querySelector('.container');
+        if (container) {
+            const firstChild = container.firstChild;
+            container.insertBefore(alertDiv, firstChild);
+        }
+    } else {
+        container.appendChild(alertDiv);
+    }
     
     // Auto-remove after configured duration
     setTimeout(() => {
