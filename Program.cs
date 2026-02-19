@@ -221,6 +221,19 @@ app.MapPost("/send/{topicName}", async (string topicName, SendNotificationReques
     return Results.Ok(new { message = "Notifications sent", results });
 });
 
+// VAPID public key endpoint
+app.MapGet("/vapid-public-key", (IConfiguration configuration) =>
+{
+    var publicKey = configuration["VapidKeys:PublicKey"];
+    
+    if (string.IsNullOrEmpty(publicKey) || publicKey == "YOUR_VAPID_PUBLIC_KEY")
+    {
+        return Results.Ok(new { publicKey = (string?)null, configured = false });
+    }
+    
+    return Results.Ok(new { publicKey, configured = true });
+});
+
 app.Run();
 
 // Function to generate VAPID keys
