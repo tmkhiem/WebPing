@@ -24,7 +24,7 @@ public static class NotificationEndpoints
             return text;
         
         // Trim and add ellipsis
-        return text.Substring(0, MaxBodyLength - 3) + "...";
+        return text[..(MaxBodyLength - 3)] + "...";
     }
 
     public static void MapNotificationEndpoints(this IEndpointRouteBuilder app)

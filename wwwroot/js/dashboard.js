@@ -40,17 +40,14 @@ function switchTab(tabName, event) {
     currentTab = tabName;
     
     // Update tab buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    if (event && event.target) {
-        event.target.closest('.tab-btn').classList.add('active');
-    } else {
-        // Find the button by tab name
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            if (btn.onclick && btn.onclick.toString().includes(`'${tabName}'`)) {
-                btn.classList.add('active');
-            }
-        });
-    }
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        // Check if this button matches the target tab by checking onclick content
+        const onclick = btn.getAttribute('onclick');
+        if (onclick && onclick.includes(`'${tabName}'`)) {
+            btn.classList.add('active');
+        }
+    });
     
     // Update tab content
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -319,11 +316,9 @@ async function handleCreateTopic(event) {
 }
 
 async function deleteTopic(topicName) {
-    if (!confirm(`Delete topic "${topicName}"?`)) {
-        return;
-    }
-    
-    showAlert('Note: DELETE endpoint not implemented. Topic deletion requires backend support.', 'info');
+    // Note: Topic deletion endpoint is not implemented in the backend
+    // The delete button is shown for future functionality
+    showAlert('Topic deletion not yet implemented', 'info');
 }
 
 // Subscriptions functionality
