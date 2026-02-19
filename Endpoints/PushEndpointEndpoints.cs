@@ -58,6 +58,28 @@ public static class PushEndpointEndpoints
             return Results.Ok(endpoints);
         }).RequireAuth();
 
+        app.MapPut("/push-endpoints/{id}", async (int id, UpdatePushEndpointRequest request, HttpContext context, WebPingDbContext dbContext) =>
+        {
+            var username = context.Items["Username"]?.ToString();
+            if (string.IsNullOrEmpty(username))
+            {
+                return Results.Unauthorized();
+            }
+
+            var endpoint = await dbContext.PushEndpoints
+                .FirstOrDefaultAsync(p => p.Id == id && p.Username == username);
+
+            if (endpoint == null)
+            {
+                return Results.NotFound(new { message = "Push endpoint not found" });
+            }
+
+            endpoint.Name = request.Name;
+            await dbContext.SaveChangesAsync();
+
+            return Results.Ok(new { message = "Push endpoint updated successfully" });
+        }).RequireAuth();
+
         app.MapDelete("/push-endpoints/{id}", async (int id, HttpContext context, WebPingDbContext dbContext) =>
         {
             var username = context.Items["Username"]?.ToString();

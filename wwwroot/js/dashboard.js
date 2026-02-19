@@ -153,11 +153,13 @@ async function loadTopics() {
     const topicsContainer = document.getElementById('topics-container');
     
     loadingDiv.classList.remove('hidden');
+    topicsContainer.classList.add('hidden');
     
     try {
         const topics = await apiCall('/topics', { method: 'GET' });
         
         loadingDiv.classList.add('hidden');
+        topicsContainer.classList.remove('hidden');
         
         if (!topics || topics.length === 0) {
             topicsContainer.innerHTML = `
@@ -188,6 +190,7 @@ async function loadTopics() {
         });
     } catch (error) {
         loadingDiv.classList.add('hidden');
+        topicsContainer.classList.remove('hidden');
         showAlert('Failed to load topics: ' + error.message, 'error');
     }
 }
@@ -214,7 +217,7 @@ function createTopicCard(topic) {
             </div>
             <div class="topic-card-body">
                 <div class="topic-endpoint">
-                    <code>POST ${endpoint}</code>
+                    <code>${endpoint}</code>
                 </div>
                 <div class="topic-card-expanded hidden">
                     <div class="code-tabs">
@@ -441,11 +444,13 @@ async function loadEndpoints() {
     const endpointsContainer = document.getElementById('endpoints-container');
     
     loadingDiv.classList.remove('hidden');
+    endpointsContainer.classList.add('hidden');
     
     try {
         const endpoints = await apiCall('/push-endpoints', { method: 'GET' });
         
         loadingDiv.classList.add('hidden');
+        endpointsContainer.classList.remove('hidden');
         
         if (!endpoints || endpoints.length === 0) {
             endpointsContainer.innerHTML = `
@@ -470,6 +475,7 @@ async function loadEndpoints() {
         `).join('');
     } catch (error) {
         loadingDiv.classList.add('hidden');
+        endpointsContainer.classList.remove('hidden');
         showAlert('Failed to load devices: ' + error.message, 'error');
     }
 }
