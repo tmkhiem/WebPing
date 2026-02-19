@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebPing.Data;
 using WebPing.DTOs;
+using WebPing.Extensions;
 using WebPing.Models;
 
 namespace WebPing.Endpoints;
@@ -39,7 +40,7 @@ public static class PushEndpointEndpoints
             await dbContext.SaveChangesAsync();
 
             return Results.Ok(new { message = "Push endpoint registered successfully", id = endpoint.Id });
-        });
+        }).RequireAuth();
 
         app.MapGet("/push-endpoints", async (HttpContext context, WebPingDbContext dbContext) =>
         {
@@ -55,7 +56,7 @@ public static class PushEndpointEndpoints
                 .ToListAsync();
 
             return Results.Ok(endpoints);
-        });
+        }).RequireAuth();
 
         app.MapDelete("/push-endpoints/{id}", async (int id, HttpContext context, WebPingDbContext dbContext) =>
         {
@@ -77,6 +78,6 @@ public static class PushEndpointEndpoints
             await dbContext.SaveChangesAsync();
 
             return Results.Ok(new { message = "Push endpoint deleted successfully" });
-        });
+        }).RequireAuth();
     }
 }

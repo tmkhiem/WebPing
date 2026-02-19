@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebPing.Data;
 using WebPing.DTOs;
+using WebPing.Extensions;
 using WebPing.Models;
 
 namespace WebPing.Endpoints;
@@ -34,7 +35,7 @@ public static class TopicEndpoints
             await dbContext.SaveChangesAsync();
 
             return Results.Ok(new { message = "Topic created successfully", topic = request.Name });
-        });
+        }).RequireAuth();
 
         app.MapGet("/topics", async (HttpContext context, WebPingDbContext dbContext) =>
         {
@@ -50,6 +51,6 @@ public static class TopicEndpoints
                 .ToListAsync();
 
             return Results.Ok(topics);
-        });
+        }).RequireAuth();
     }
 }
