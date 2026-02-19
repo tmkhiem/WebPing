@@ -1,4 +1,4 @@
-/* WebPing - Simple and clean styling */
+/* WebPing - Material Orange/Red Theme */
 
 * {
     margin: 0;
@@ -8,7 +8,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #ff6f00 0%, #d84315 100%);
     min-height: 100vh;
     padding: 20px;
     color: #333;
@@ -24,7 +24,7 @@ body {
 }
 
 h1 {
-    color: #667eea;
+    color: #ff6f00;
     margin-bottom: 10px;
     font-size: 28px;
 }
@@ -33,7 +33,7 @@ h2 {
     color: #555;
     margin-bottom: 20px;
     font-size: 20px;
-    border-bottom: 2px solid #667eea;
+    border-bottom: 2px solid #ff6f00;
     padding-bottom: 10px;
 }
 
@@ -68,7 +68,7 @@ input[type="text"]:focus,
 input[type="password"]:focus,
 textarea:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #ff6f00;
 }
 
 textarea {
@@ -77,7 +77,7 @@ textarea {
 }
 
 button {
-    background: #667eea;
+    background: #ff6f00;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -89,7 +89,7 @@ button {
 }
 
 button:hover {
-    background: #5568d3;
+    background: #f57c00;
 }
 
 button:disabled {
@@ -106,11 +106,11 @@ button.secondary:hover {
 }
 
 button.danger {
-    background: #dc3545;
+    background: #d84315;
 }
 
 button.danger:hover {
-    background: #c82333;
+    background: #bf360c;
 }
 
 .btn-group {
@@ -139,13 +139,13 @@ button.danger:hover {
 }
 
 .alert-info {
-    background: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
+    background: #fff3e0;
+    color: #e65100;
+    border: 1px solid #ffe0b2;
 }
 
 .user-info {
-    background: #f8f9fa;
+    background: #fff3e0;
     padding: 12px;
     border-radius: 6px;
     margin-bottom: 20px;
@@ -174,7 +174,7 @@ button.danger:hover {
 }
 
 .list-item:hover {
-    border-color: #667eea;
+    border-color: #ff6f00;
 }
 
 .list-item-content {
@@ -217,7 +217,7 @@ button.danger:hover {
 }
 
 .nav-links a {
-    color: #667eea;
+    color: #ff6f00;
     text-decoration: none;
     font-weight: 600;
 }
@@ -229,7 +229,7 @@ button.danger:hover {
 .loading {
     text-align: center;
     padding: 20px;
-    color: #667eea;
+    color: #ff6f00;
 }
 
 .hidden {
@@ -249,7 +249,7 @@ button.danger:hover {
 }
 
 .auth-toggle a {
-    color: #667eea;
+    color: #ff6f00;
     text-decoration: none;
     font-weight: 600;
 }
