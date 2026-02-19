@@ -52,5 +52,27 @@ public static class TopicEndpoints
 
             return Results.Ok(topics);
         }).RequireAuth();
+
+        app.MapDelete("/topics/{name}", async (string name, HttpContext context, WebPingDbContext dbContext) =>
+        {
+            var username = context.Items["Username"]?.ToString();
+            if (string.IsNullOrEmpty(username))
+            {
+                return Results.Unauthorized();
+            }
+
+            var topic = await dbContext.Topics
+                .FirstOrDefaultAsync(t => t.Name == name && t.Username == username);
+
+            if (topic == null)
+            {
+                return Results.NotFound(new { message = "Topic not found" });
+            }
+
+            dbContext.Topics.Remove(topic);
+            await dbContext.SaveChangesAsync();
+
+            return Results.Ok(new { message = "Topic deleted successfully" });
+        }).RequireAuth();
     }
 }

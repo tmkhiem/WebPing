@@ -214,7 +214,7 @@ function createTopicCard(topic) {
             </div>
             <div class="topic-card-body">
                 <div class="topic-endpoint">
-                    <code>POST ${endpoint}</code>
+                    <code>${endpoint}</code>
                 </div>
                 <div class="topic-card-expanded hidden">
                     <div class="code-tabs">
