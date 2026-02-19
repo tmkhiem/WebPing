@@ -45,3 +45,5 @@ bld/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+/webping.db-shm
+/webping.db-wal
