@@ -11,9 +11,25 @@ namespace WebPing.Endpoints;
 
 public static class NotificationEndpoints
 {
+    // Web push payload size limit is typically around 4KB, but we'll use a conservative limit
+    // for the body text to account for JSON overhead and other fields
+    private const int MaxBodyLength = 300;
+
+    private static string TrimToWebPushLimit(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return text;
+        
+        if (text.Length <= MaxBodyLength)
+            return text;
+        
+        // Trim and add ellipsis
+        return text.Substring(0, MaxBodyLength - 3) + "...";
+    }
+
     public static void MapNotificationEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/send/{topicName}", async (string topicName, SendNotificationRequest request, WebPingDbContext dbContext, IWebPushService webPushService) =>
+        app.MapPost("/send/{topicName}", async (string topicName, HttpContext context, WebPingDbContext dbContext, IWebPushService webPushService) =>
         {
             // Find the topic
             var topic = await dbContext.Topics
@@ -26,13 +42,51 @@ public static class NotificationEndpoints
                 return Results.NotFound(new { message = "Topic not found" });
             }
 
+            // Read the request body
+            string bodyContent;
+            using (var reader = new StreamReader(context.Request.Body))
+            {
+                bodyContent = await reader.ReadToEndAsync();
+            }
+
+            string title;
+            string body;
+            string icon = "";
+            string data = "";
+
+            // Check if body is JSON or plain text
+            if (!string.IsNullOrWhiteSpace(bodyContent) && bodyContent.TrimStart().StartsWith("{"))
+            {
+                // Try to parse as JSON (SendNotificationRequest)
+                try
+                {
+                    var request = JsonSerializer.Deserialize<SendNotificationRequest>(bodyContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    title = request?.Title ?? topicName;
+                    body = request?.Body ?? "";
+                    icon = request?.Icon ?? "";
+                    data = request?.Data ?? "";
+                }
+                catch
+                {
+                    // If JSON parsing fails, treat as plain text
+                    title = topicName;
+                    body = TrimToWebPushLimit(bodyContent);
+                }
+            }
+            else
+            {
+                // Plain text body - use topic name as title
+                title = topicName;
+                body = TrimToWebPushLimit(bodyContent ?? "");
+            }
+
             // Create notification payload
             var payload = JsonSerializer.Serialize(new
             {
-                title = request.Title ?? "Notification",
-                body = request.Body ?? "",
-                icon = request.Icon ?? "",
-                data = request.Data ?? ""
+                title,
+                body,
+                icon,
+                data
             });
 
             // Send to all push endpoints for this user
