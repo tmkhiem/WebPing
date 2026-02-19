@@ -53,6 +53,8 @@ public static class NotificationEndpoints
             return Results.Ok(new { message = "Notifications sent", results });
         });
 
+        // VAPID public key endpoint - intentionally public (no RequireAuth)
+        // This must be accessible to unauthenticated users for push subscription setup
         app.MapGet("/vapid-public-key", (IConfiguration configuration) =>
         {
             var publicKey = configuration["VapidKeys:PublicKey"];
