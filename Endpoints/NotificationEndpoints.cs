@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using WebPing.Constants;
 using WebPing.Data;
 using WebPing.DTOs;
 using WebPing.Models;
@@ -59,7 +60,7 @@ public static class NotificationEndpoints
         {
             var publicKey = configuration["VapidKeys:PublicKey"];
             
-            if (string.IsNullOrEmpty(publicKey) || publicKey == "YOUR_VAPID_PUBLIC_KEY")
+            if (string.IsNullOrEmpty(publicKey) || publicKey == VapidConstants.PlaceholderPublicKey)
             {
                 return Results.Ok(new { publicKey = (string?)null, configured = false });
             }
