@@ -36,12 +36,21 @@ function initDashboard() {
 }
 
 // Tab switching
-function switchTab(tabName) {
+function switchTab(tabName, event) {
     currentTab = tabName;
     
     // Update tab buttons
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.closest('.tab-btn').classList.add('active');
+    if (event && event.target) {
+        event.target.closest('.tab-btn').classList.add('active');
+    } else {
+        // Find the button by tab name
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            if (btn.onclick && btn.onclick.toString().includes(`'${tabName}'`)) {
+                btn.classList.add('active');
+            }
+        });
+    }
     
     // Update tab content
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -65,7 +74,19 @@ function toggleUserMenu() {
 document.addEventListener('click', (e) => {
     const userMenu = document.querySelector('.user-menu');
     if (userMenu && !userMenu.contains(e.target)) {
-        document.getElementById('user-dropdown').classList.add('hidden');
+        const dropdown = document.getElementById('user-dropdown');
+        if (dropdown) {
+            dropdown.classList.add('hidden');
+        }
+    }
+    
+    // Close modal when clicking outside
+    const modal = document.getElementById('change-password-modal');
+    if (modal && !modal.classList.contains('hidden')) {
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent && !modalContent.contains(e.target)) {
+            closeChangePassword();
+        }
     }
 });
 
