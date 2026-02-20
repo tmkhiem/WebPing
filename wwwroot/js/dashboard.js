@@ -90,7 +90,8 @@ document.addEventListener('click', (e) => {
 });
 
 // Change email modal
-function showChangeEmail() {
+function showChangeEmail(event) {
+    if (event) event.stopPropagation();
     document.getElementById('user-dropdown').classList.add('hidden');
     // Pre-fill with current email if available
     apiCall('/auth/profile', { method: 'GET' }).then(profile => {
@@ -125,7 +126,8 @@ async function handleChangeEmail(event) {
 }
 
 // Change password modal
-function showChangePassword() {
+function showChangePassword(event) {
+    if (event) event.stopPropagation();
     document.getElementById('user-dropdown').classList.add('hidden');
     document.getElementById('change-password-modal').classList.remove('hidden');
 }
