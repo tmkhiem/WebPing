@@ -45,6 +45,10 @@
                     <input type="text" id="register-username" required autocomplete="username">
                 </div>
                 <div class="form-group">
+                    <label for="register-email">Email (optional)</label>
+                    <input type="email" id="register-email" autocomplete="email">
+                </div>
+                <div class="form-group">
                     <label for="register-password">Password</label>
                     <input type="password" id="register-password" required minlength="6" autocomplete="new-password">
                 </div>
@@ -102,6 +106,7 @@
             event.preventDefault();
             
             const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
 
             if (password.length < 6) {
@@ -113,7 +118,7 @@
                 const data = await apiCall('/auth/register', {
                     method: 'POST',
                     skipAuth: true,
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username, password, email })
                 });
 
                 if (data) {
