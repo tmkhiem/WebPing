@@ -33,6 +33,7 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<WebPingDbContext>();
     context.Database.EnsureCreated();
+    await MigrateDatabaseAsync(context);
 }
 
 // Configure the HTTP request pipeline.
@@ -58,6 +59,39 @@ app.MapPushEndpointEndpoints();
 app.MapNotificationEndpoints();
 
 app.Run();
+
+// Function to migrate database schema by adding missing columns
+static async Task MigrateDatabaseAsync(WebPingDbContext context)
+{
+    var connection = context.Database.GetDbConnection();
+    await connection.OpenAsync();
+
+    try
+    {
+        // Check columns in Users table and add any missing ones
+        var userColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        using (var cmd = connection.CreateCommand())
+        {
+            cmd.CommandText = "PRAGMA table_info(Users)";
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                userColumns.Add(reader.GetString(1));
+            }
+        }
+
+        if (userColumns.Count > 0 && !userColumns.Contains("Email"))
+        {
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "ALTER TABLE Users ADD COLUMN Email TEXT NOT NULL DEFAULT ''";
+            await cmd.ExecuteNonQueryAsync();
+        }
+    }
+    finally
+    {
+        await connection.CloseAsync();
+    }
+}
 
 // Function to generate VAPID keys
 static void GenerateVapidKeys()

@@ -77,15 +77,52 @@ document.addEventListener('click', (e) => {
         }
     }
     
-    // Close modal when clicking outside
-    const modal = document.getElementById('change-password-modal');
-    if (modal && !modal.classList.contains('hidden')) {
-        const modalContent = modal.querySelector('.modal-content');
-        if (modalContent && !modalContent.contains(e.target)) {
-            closeChangePassword();
+    // Close modals when clicking outside
+    ['change-password-modal', 'change-email-modal'].forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal && !modal.classList.contains('hidden')) {
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent && !modalContent.contains(e.target)) {
+                modal.classList.add('hidden');
+            }
         }
-    }
+    });
 });
+
+// Change email modal
+function showChangeEmail() {
+    document.getElementById('user-dropdown').classList.add('hidden');
+    // Pre-fill with current email if available
+    apiCall('/auth/profile', { method: 'GET' }).then(profile => {
+        if (profile?.email) {
+            document.getElementById('new-email').value = profile.email;
+        }
+    }).catch(() => {});
+    document.getElementById('change-email-modal').classList.remove('hidden');
+}
+
+function closeChangeEmail() {
+    document.getElementById('change-email-modal').classList.add('hidden');
+    document.getElementById('new-email').value = '';
+}
+
+async function handleChangeEmail(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('new-email').value;
+    
+    try {
+        await apiCall('/auth/email', {
+            method: 'PUT',
+            body: JSON.stringify({ email })
+        });
+        
+        showAlert('Email updated successfully!', 'success');
+        closeChangeEmail();
+    } catch (error) {
+        showAlert('Failed to update email: ' + error.message, 'error');
+    }
+}
 
 // Change password modal
 function showChangePassword() {

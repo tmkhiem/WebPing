@@ -6,9 +6,11 @@ namespace WebPing.Services;
 
 public interface IAuthService
 {
-    Task<User?> RegisterAsync(string username, string password);
+    Task<User?> RegisterAsync(string username, string password, string? email = null);
     Task<User?> LoginAsync(string username, string password);
     Task<User?> GetUserAsync(string username);
+    Task<bool> ChangePasswordAsync(string username, string newPassword);
+    Task<bool> UpdateEmailAsync(string username, string email);
 }
 
 public class AuthService : IAuthService
@@ -20,7 +22,7 @@ public class AuthService : IAuthService
         _context = context;
     }
 
-    public async Task<User?> RegisterAsync(string username, string password)
+    public async Task<User?> RegisterAsync(string username, string password, string? email = null)
     {
         // Check if user already exists
         var existingUser = await _context.Users.FindAsync(username);
@@ -32,7 +34,8 @@ public class AuthService : IAuthService
         var user = new User
         {
             Username = username,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password)
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
+            Email = email ?? string.Empty
         };
 
         _context.Users.Add(user);
@@ -63,5 +66,31 @@ public class AuthService : IAuthService
             .Include(u => u.Topics)
             .Include(u => u.PushEndpoints)
             .FirstOrDefaultAsync(u => u.Username == username);
+    }
+
+    public async Task<bool> ChangePasswordAsync(string username, string newPassword)
+    {
+        var user = await _context.Users.FindAsync(username);
+        if (user == null)
+        {
+            return false;
+        }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> UpdateEmailAsync(string username, string email)
+    {
+        var user = await _context.Users.FindAsync(username);
+        if (user == null)
+        {
+            return false;
+        }
+
+        user.Email = email;
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

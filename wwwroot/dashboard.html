@@ -23,6 +23,10 @@
                     <span class="material-symbols-outlined">expand_more</span>
                 </button>
                 <div id="user-dropdown" class="user-dropdown hidden">
+                    <div class="user-dropdown-item" onclick="showChangeEmail()">
+                        <span class="material-symbols-outlined">email</span>
+                        Change Email
+                    </div>
                     <div class="user-dropdown-item" onclick="showChangePassword()">
                         <span class="material-symbols-outlined">lock</span>
                         Change Password
@@ -136,6 +140,28 @@
                 </div>
                 <div id="endpoints-container"></div>
             </section>
+        </div>
+    </div>
+
+    <!-- Change Email Modal -->
+    <div id="change-email-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Change Email</h2>
+                <button class="modal-close" onclick="closeChangeEmail()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form onsubmit="handleChangeEmail(event)">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="new-email" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="secondary" onclick="closeChangeEmail()">Cancel</button>
+                    <button type="submit">Save Email</button>
+                </div>
+            </form>
         </div>
     </div>
 
