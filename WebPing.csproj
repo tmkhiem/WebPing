@@ -27,12 +27,4 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<!-- This ensures all files in wwwroot are treated as content and copied on publish -->
-		<Content Include="wwwroot\**">
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-	</ItemGroup>
-
-
 </Project>
