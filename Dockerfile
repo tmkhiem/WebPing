@@ -16,12 +16,12 @@ RUN dotnet publish "WebPing.csproj" -c Release -r linux-musl-x64 -o /app/publish
 FROM alpine:latest
 WORKDIR /app
 
-# Non-root user 'app' is included in .NET 8 images
-USER app
 EXPOSE 8080
 
 # Copy only the published native binary and static assets
 COPY --from=build /app/publish .
+
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 
 # The entrypoint is now the binary name itself, not 'dotnet binary.dll'
 ENTRYPOINT ["./WebPing"]
