@@ -13,7 +13,7 @@ RUN dotnet publish "WebPing.csproj" -c Release -r linux-musl-x64 -o /app/publish
     --no-restore /p:PublishAot=true /p:PublishTrimmed=true
 
 # 2. Final Stage: Use runtime-deps (no .NET runtime included, binary is self-contained)
-FROM ://mcr.microsoft.com AS final
+FROM alpine:latest
 WORKDIR /app
 
 # Non-root user 'app' is included in .NET 8 images
