@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
 using WebPing.Data;
 using WebPing.Endpoints;
@@ -21,6 +22,10 @@ builder.Services.AddDbContext<WebPingDbContext>(options =>
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IWebPushService, WebPushService>();
+
+// Register Google UserCredential as a singleton
+builder.Services.AddSingleton(WebPing.Utilities.MailUtilities.ReadGoogleCredentials());
+
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddEndpointsApiExplorer();
