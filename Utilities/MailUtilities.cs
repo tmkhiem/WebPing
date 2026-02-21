@@ -15,6 +15,27 @@ static class MailUtilities
         string[] scopes = new string[] { "https://www.googleapis.com/auth/gmail.send", "https://www.googleapis.com/auth/drive" };
         var clientIdFile = "webping-credentials.json";
 
+        // Read clientIdFile
+
+        // Due to NativeAoT, this code does not work. Below is the error message:
+
+        /*Unhandled Exception: Newtonsoft.Json.JsonSerializationException: Unable to find a constructor to use for type Google.Apis.Auth.OAuth2.GoogleClientSecrets. A class should either have a default constructor, one constructor with arguments or a constructor marked with the JsonConstructor attribute. Path 'installed', line 1, position 13.
+             at Newtonsoft.Json.Serialization.JsonSerializerInternalReader.CreateNewObject(JsonReader, JsonObjectContract, JsonProperty, JsonProperty, String, Boolean&) + 0x1a6
+             at Newtonsoft.Json.Serialization.JsonSerializerInternalReader.CreateObject(JsonReader, Type, JsonContract, JsonProperty, JsonContainerContract, JsonProperty, Object) + 0x2cf
+             at Newtonsoft.Json.Serialization.JsonSerializerInternalReader.CreateValueInternal(JsonReader, Type, JsonContract, JsonProperty, JsonContainerContract, JsonProperty, Object) + 0x9e
+             at Newtonsoft.Json.Serialization.JsonSerializerInternalReader.Deserialize(JsonReader, Type, Boolean) + 0x25f
+             at Newtonsoft.Json.JsonSerializer.DeserializeInternal(JsonReader, Type) + 0x100
+             at Google.Apis.Json.NewtonsoftJsonSerializer.Deserialize[T](Stream) + 0xa2
+             at Google.Apis.Auth.OAuth2.GoogleClientSecrets.FromFile(String) + 0x56
+             at WebPing.Utilities.MailUtilities.ReadGoogleCredentials() + 0x42
+             at Program.<<Main>$>d__0.MoveNext() + 0x13c
+             --- End of stack trace from previous location ---
+             at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw() + 0x1c
+             at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task) + 0xbe
+             at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task, ConfigureAwaitOptions) + 0x4e   
+                  at Program.<Main>(String[] args) + 0x24
+                  at WebPing!<BaseAddress>+0x15192dc */
+
         var credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
             GoogleClientSecrets.FromFile(clientIdFile).Secrets,
             scopes,
