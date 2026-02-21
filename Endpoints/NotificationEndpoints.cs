@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WebPing.Constants;
 using WebPing.Data;
 using WebPing.DTOs;
-using WebPing.Extensions;
+using WebPing.Utilities;
 using WebPing.Models;
 using WebPing.Services;
 

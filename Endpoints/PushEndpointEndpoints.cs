@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebPing.Data;
 using WebPing.DTOs;
-using WebPing.Extensions;
+using WebPing.Utilities;
 using WebPing.Models;
 
 namespace WebPing.Endpoints;

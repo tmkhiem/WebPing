@@ -1,5 +1,5 @@
 using WebPing.DTOs;
-using WebPing.Extensions;
+using WebPing.Utilities;
 using WebPing.Services;
 
 namespace WebPing.Endpoints;

@@ -1,4 +1,4 @@
-namespace WebPing.Extensions;
+namespace WebPing.Utilities;
 
 /// <summary>
 /// Extension methods for marking endpoints as requiring authentication

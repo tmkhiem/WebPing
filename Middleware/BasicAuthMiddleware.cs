@@ -1,5 +1,5 @@
 using System.Text;
-using WebPing.Extensions;
+using WebPing.Utilities;
 using WebPing.Services;
 
 namespace WebPing.Middleware;
