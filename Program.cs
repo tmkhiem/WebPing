@@ -16,9 +16,16 @@ if (args.Length > 0 && args[0] == "--generate-vapid-keys")
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Ensure database directory exists
+var dbFolder = Path.Combine(builder.Environment.ContentRootPath, "db");
+if (!Directory.Exists(dbFolder))
+{
+    Directory.CreateDirectory(dbFolder);
+}
+
 // Add services to the container.
 builder.Services.AddDbContext<WebPingDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=webping.db"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=db/webping.db"));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IWebPushService, WebPushService>();
@@ -81,7 +88,12 @@ static async Task MigrateDatabaseAsync(WebPingDbContext context)
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                userColumns.Add(reader.GetString(1));
+                // In SQLite PRAGMA table_info, column name is at index 1
+                // 0: cid, 1: name, 2: type, 3: notnull, 4: dflt_value, 5: pk
+                if (!reader.IsDBNull(1))
+                {
+                    userColumns.Add(reader.GetString(1));
+                }
             }
         }
 
