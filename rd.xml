@@ -1,9 +1,0 @@
-﻿<Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
-	<Application>
-		<!-- Preserves the entire assembly and its types for reflection/deserialization -->
-		<Assembly Name="Google.Apis.Auth" Dynamic="Required All" />
-
-		<!-- Specifically targets the OAuth2 namespace if you want to be more granular -->
-		<Namespace Name="Google.Apis.Auth.OAuth2" Dynamic="Required All" />
-	</Application>
-</Directives>

@@ -36,6 +36,34 @@ static class MailUtilities
                   at Program.<Main>(String[] args) + 0x24
                   at WebPing!<BaseAddress>+0x15192dc */
 
+        // Leave time so developers can connect to the container and inspect its filesystem
+
+        try
+        {
+            // Try access "webping-googleapis-data" folder and read token.json
+
+            // 1. List files in "webping-googleapis-data" folder
+            var folderContents = Directory.GetFiles("webping-googleapis-data");
+
+            // 2. Try read the first file in the folder
+            if (folderContents.Length > 0)
+            {
+                var tokenFile = folderContents[0];
+                var tokenContent = File.ReadAllText(tokenFile);
+                Console.WriteLine("Token file content: " + tokenContent);
+            }
+            else
+            {
+                Console.WriteLine("No files found in webping-googleapis-data folder.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error accessing webping-googleapis-data folder: " + ex.Message);
+            while (true)
+                System.Threading.Thread.Sleep(60000); // Sleep for 1 minute to allow inspection of the folder
+        }
+
         var credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
             GoogleClientSecrets.FromFile(clientIdFile).Secrets,
             scopes,
@@ -44,7 +72,7 @@ static class MailUtilities
             new FileDataStore("webping-googleapis-data", true)).Result;
 
         var accessToken = credential.GetAccessTokenForRequestAsync().Result;
-        Console.WriteLine("Access Token: " + accessToken);
+        // Console.WriteLine("Access Token: " + accessToken);
         return credential;
     }
 

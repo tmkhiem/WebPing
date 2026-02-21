@@ -10,18 +10,17 @@ RUN dotnet restore -r linux-musl-x64
 COPY . .
 # Publish as a native binary
 RUN dotnet publish "WebPing.csproj" -c Release -r linux-musl-x64 -o /app/publish \
-    --no-restore /p:PublishAot=true /p:PublishTrimmed=true
+    --no-restore /p:PublishTrimmed=true
 
 # 2. Final Stage: Use runtime-deps (no .NET runtime included, binary is self-contained)
-FROM alpine:latest
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
+
 WORKDIR /app
 
 EXPOSE 8080
 
 # Copy only the published native binary and static assets
 COPY --from=build /app/publish .
-
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 
 # The entrypoint is now the binary name itself, not 'dotnet binary.dll'
 ENTRYPOINT ["./WebPing"]

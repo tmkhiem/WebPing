@@ -5,9 +5,19 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-		<PublishAot>true</PublishAot>
 		<InvariantGlobalization>true</InvariantGlobalization>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="webping-googleapis-data\**" />
+	  <Content Remove="webping-googleapis-data\**" />
+	  <EmbeddedResource Remove="webping-googleapis-data\**" />
+	  <None Remove="webping-googleapis-data\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Remove="webping-credentials.json" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Remove="webping.db" />
